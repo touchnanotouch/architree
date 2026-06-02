@@ -1,0 +1,50 @@
+{{define "base"}}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Title -->
+
+    <title>ArchiTree</title>
+
+    <!-- CSS Loader -->
+
+    <link rel="stylesheet" href="/static/css/load.css">
+
+    <!-- Font Awesome -->
+
+    <link rel="stylesheet" href="/static/lib/font-awesome/css/all.min.css">
+</head>
+<body>
+    <!-- App -->
+
+    <div class="app" x-data="app()">
+        <!-- Topbar -->
+
+        <header class="topbar">{{template "topbar" .}}</header>
+
+        <!-- App Layout -->
+
+        <div class="app-layout">
+            <!-- Sidebar -->
+
+            <aside class="sidebar">{{template "sidebar" .}}</aside>
+
+            <!-- App Content -->
+
+            <main class="app-layout__content" tabindex="-1">
+                {{template "page" .}}
+            </main>
+        </div>
+    </div>
+
+    <!-- JS Loader -->
+
+    <script src="/static/js/load.js" defer></script>
+</body>
+</html>
+
+{{end}}

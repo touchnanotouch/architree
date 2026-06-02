@@ -1,0 +1,92 @@
+/* Root Vars */
+
+:root {
+    /* Typography — Fonts */
+
+    --font: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-mono: 'JetBrains Mono', 'Consolas', monospace;
+
+    /* Typography — Sizes */
+
+    --text-xs: 0.6875rem;
+    --text-sm: 0.8125rem;
+    --text-base: 0.875rem;
+    --text-lg: 1.125rem;
+    --text-xl: 1.75rem;
+
+    /* Spacing */
+
+    --space-xs: 0.25rem;
+    --space-sm: 0.5rem;
+    --space-md: 0.75rem;
+    --space-lg: 1rem;
+    --space-xl: 1.5rem;
+
+    /* Border Radius */
+
+    --radius-sm: 4px;
+    --radius-md: 6px;
+    --radius-lg: 8px;
+
+    /* Transitions */
+
+    --transition-fast: 0.1s;
+    --transition-normal: 0.2s;
+    --transition-slow: 0.3s;
+
+    /* Z-Index */
+
+    --z-dropdown: 100;
+    --z-modal: 200;
+    --z-tooltip: 300;
+
+    /* Layout */
+
+    --sidebar-width: 20rem;
+
+    /* Colors — Accent */
+
+    --accent: #58a6ff;
+    --accent-hover: #79c0ff;
+
+    /* Colors — Surface */
+
+    --bg: #0d1117;
+    --bg-secondary: #161b22;
+    --bg-tertiary: #21262d;
+
+    /* Colors — Text */
+
+    --text: #e6edf3;
+    --text-secondary: #8b949e;
+
+    /* Colors — Border */
+
+    --border: #30363d;
+
+    /* Colors — System */
+
+    --success: #3fb950;
+    --danger: #f85149;
+    --warning: #d29922;
+}
+
+/* Light Theme */
+
+.light {
+    --accent: #0969da;
+    --accent-hover: #0550ae;
+
+    --bg: #ffffff;
+    --bg-secondary: #f6f8fa;
+    --bg-tertiary: #eaeef2;
+
+    --text: #1f2328;
+    --text-secondary: #656d76;
+
+    --border: #d0d7de;
+
+    --success: #1a7f37;
+    --danger: #cf222e;
+    --warning: #9a6700;
+}

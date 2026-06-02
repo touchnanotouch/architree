@@ -1,0 +1,11 @@
+services:
+  architree:
+    build: .
+    container_name: architree
+    ports:
+      - "${ARCHI_PORT:-8080}:8080"
+    env_file:
+      - .env
+    volumes:
+      - /:/host:ro
+    restart: unless-stopped

@@ -1,0 +1,159 @@
+/* Topbar */
+
+.topbar {
+    /* Box Model */
+
+    padding: var(--space-sm) var(--space-lg);
+    gap: var(--space-lg);
+
+    /* Flex */
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    /* Visual */
+
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border);
+}
+
+/* Sections */
+
+.topbar__left,
+.topbar__right {
+    /* Flex */
+
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+.topbar__center {
+    /* Flex */
+
+    flex: 1;
+    display: flex;
+    justify-content: center;
+}
+
+/* Logo */
+
+.topbar__logo {
+    /* Typography */
+
+    font-size: var(--text-lg);
+    font-weight: 700;
+
+    /* Visual */
+
+    color: var(--accent);
+}
+
+/* Workspace Picker */
+
+.workspace-picker {
+    /* Box Model */
+
+    width: 100%;
+    max-width: 600px;
+    gap: var(--space-sm);
+
+    /* Flex */
+
+    display: flex;
+}
+
+.workspace-picker__input {
+    /* Box Model */
+
+    flex: 1;
+    padding: var(--space-sm) var(--space-md);
+
+    /* Typography */
+
+    font-size: var(--text-base);
+    font-family: var(--font-mono);
+
+    /* Visual */
+
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--bg);
+    color: var(--text);
+    outline: none;
+
+    /* Animation */
+
+    transition: border-color var(--transition-fast);
+}
+
+.workspace-picker__input:focus {
+    /* Visual */
+
+    border-color: var(--accent);
+}
+
+.workspace-picker__button {
+    /* Box Model */
+
+    padding: var(--space-sm) var(--space-lg);
+
+    /* Typography */
+
+    font-size: var(--text-base);
+
+    /* Visual */
+
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--accent);
+    color: #fff;
+    cursor: pointer;
+
+    /* Animation */
+
+    transition: background var(--transition-fast);
+}
+
+.workspace-picker__button:hover {
+    /* Visual */
+
+    background: var(--accent-hover);
+}
+
+/* Toggle */
+
+.topbar__toggle {
+    /* Box Model */
+
+    padding: var(--space-xs) var(--space-sm);
+
+    /* Typography */
+
+    font-size: var(--text-sm);
+
+    /* Visual */
+
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--bg-tertiary);
+    color: var(--text);
+    cursor: pointer;
+
+    /* Flex (for SVG centering) */
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    /* Animation */
+
+    transition: background var(--transition-fast);
+}
+
+.topbar__toggle:hover {
+    /* Visual */
+
+    background: var(--border);
+}

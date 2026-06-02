@@ -1,0 +1,54 @@
+/* Reset */
+
+*,
+*::before,
+*::after {
+    /* Box Model */
+
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html,
+body {
+    /* Box Model */
+
+    height: 100%;
+
+    /* Typography */
+
+    font-family: var(--font);
+    color: var(--text);
+
+    /* Visual */
+
+    background: var(--bg);
+}
+
+/* Scrollbar */
+
+::-webkit-scrollbar {
+    /* Box Model */
+
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    /* Visual */
+
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    /* Visual */
+
+    background: var(--border);
+    border-radius: var(--radius-sm);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    /* Visual */
+
+    background: var(--text-secondary);
+}

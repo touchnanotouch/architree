@@ -1,0 +1,27 @@
+{{define "topbar"}}
+
+<!-- Logo -->
+
+<div class="topbar__left">
+    <span class="topbar__logo">ArchiTree</span>
+</div>
+
+<!-- Workspace Picker -->
+
+<div class="topbar__center">
+    <div class="workspace-picker">
+        <input class="workspace-picker__input" type="text" placeholder="/path/to/project" x-model="workspacePath" @keydown.enter="scanWorkspace()">
+        <button class="workspace-picker__button" @click="scanWorkspace()">Scan</button>
+    </div>
+</div>
+
+<!-- Toggle -->
+
+<div class="topbar__right">
+    <button class="topbar__toggle" @click="toggleTheme()">
+        <span x-show="theme === 'dark'"><i class="fas fa-moon"></i></span>
+        <span x-show="theme !== 'dark'"><i class="fas fa-sun"></i></span>
+    </button>
+</div>
+
+{{end}}

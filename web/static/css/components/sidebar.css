@@ -1,0 +1,185 @@
+/* Sidebar */
+
+.sidebar__header {
+    /* Box Model */
+
+    padding: 0.625rem var(--space-lg) 0.5rem;
+
+    /* Flex */
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.sidebar__header h2 {
+    /* Typography */
+
+    font-size: var(--text-base);
+    font-weight: 600;
+}
+
+/* Content */
+
+.sidebar__content {
+    /* Box Model */
+
+    min-height: 0;
+    padding-bottom: 0.5rem;
+
+    /* Flex */
+
+    flex: 1;
+
+    /* Visual */
+
+    overflow-y: auto;
+}
+
+/* Placeholder */
+
+.sidebar__placeholder {
+    /* Box Model */
+
+    padding: var(--space-lg);
+
+    /* Typography */
+
+    font-size: var(--text-sm);
+
+    /* Visual */
+
+    color: var(--text-secondary);
+    text-align: center;
+}
+
+/* Tree */
+
+.tree {
+    /* Visual */
+
+    list-style: none;
+}
+
+.tree-node {
+    /* Box Model */
+
+    margin: 0;
+}
+
+.tree-node-header {
+    /* Box Model */
+
+    padding: 3px var(--space-lg);
+    gap: var(--space-xs);
+
+    /* Flex */
+
+    display: flex;
+    align-items: center;
+
+    /* Typography */
+
+    font-size: var(--text-sm);
+
+    /* Visual */
+
+    cursor: pointer;
+
+    /* Animation */
+
+    transition: background var(--transition-fast);
+}
+
+.tree-node-header:hover {
+    /* Visual */
+
+    background: var(--bg-tertiary);
+}
+
+/* Toggle */
+
+.tree-toggle {
+    /* Box Model */
+
+    width: 1rem;
+
+    /* Flex */
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    /* Visual */
+
+    color: var(--text-secondary);
+    flex-shrink: 0;
+}
+
+/* Icon */
+
+.tree-icon {
+    /* Flex */
+
+    display: flex;
+    align-items: center;
+
+    /* Box Model */
+
+    flex-shrink: 0;
+}
+
+.tree-icon--dir {
+    /* Visual */
+
+    color: var(--accent);
+}
+
+.tree-icon--file {
+    /* Visual */
+
+    color: var(--text-secondary);
+}
+
+/* Group Dot */
+
+.tree-group-dot {
+    /* Box Model */
+
+    width: 8px;
+    height: 8px;
+
+    /* Visual */
+
+    border-radius: 50%;
+
+    /* Box Model */
+
+    flex-shrink: 0;
+}
+
+/* Name */
+
+.tree-name {
+    /* Box Model */
+
+    flex: 1;
+
+    /* Typography */
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Children */
+
+.tree-children {
+    /* Box Model */
+
+    padding-left: var(--space-lg);
+
+    /* Visual */
+
+    list-style: none;
+}

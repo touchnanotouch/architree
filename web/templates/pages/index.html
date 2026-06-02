@@ -1,0 +1,158 @@
+{{define "page"}}
+
+<!-- Empty State -->
+
+<template x-if="!scanned">
+    <div class="empty-state">
+        <h1 class="empty-state__title">Select a Workspace</h1>
+
+        <p class="empty-state__text">Enter a project path in the top bar and click "Scan" to explore its architecture</p>
+    </div>
+</template>
+
+<!-- Project View -->
+
+<template x-if="scanned">
+    <div class="project-view">
+        <!-- Tabs -->
+
+        <div class="tabs">
+            <button class="tab" :class="{ 'tab--active': activeTab === 'tree' }" @click="switchTab('tree')">Tree</button>
+            <button class="tab" :class="{ 'tab--active': activeTab === 'groups' }" @click="switchTab('groups')">Groups</button>
+            <button class="tab" :class="{ 'tab--active': activeTab === 'stats' }" @click="switchTab('stats')">Stats</button>
+            <button class="tab" :class="{ 'tab--active': activeTab === 'tests' }" @click="switchTab('tests')">Tests</button>
+            <button class="tab" :class="{ 'tab--active': activeTab === 'cicd' }" @click="switchTab('cicd')">CI/CD</button>
+        </div>
+
+        <!-- Tab Content -->
+
+        <div class="tab-content">
+            <!-- Tree Tab -->
+
+            <div x-show="activeTab === 'tree'" class="tab-pane tab-pane--tree" id="tree-view">
+                <div class="tree-toolbar">
+                    <div class="tree-toolbar__group">
+                        <span class="tree-toolbar__modes">
+                            <button class="toolbar-btn" :class="{'toolbar-btn--active': toolMode === 'pan'}" @click="switchToolMode('pan')">Pan</button>
+                            <button class="toolbar-btn" :class="{'toolbar-btn--active': toolMode === 'select'}" @click="switchToolMode('select')">Select</button>
+                        </span>
+                    </div>
+                    <template x-if="toolMode === 'select'">
+                        <div class="tree-toolbar__group">
+                            <input class="toolbar-input" type="text" x-model="groupName" placeholder="Group name" @keyup.enter="createGroup">
+                            <button class="toolbar-btn toolbar-btn--action" @click="createGroup" :disabled="!Object.keys(selectedPaths).length">Create</button>
+                            <span class="toolbar-count" x-show="Object.keys(selectedPaths).length" x-text="Object.keys(selectedPaths).length + ' selected'"></span>
+                        </div>
+                    </template>
+                </div>
+                <div class="tree-visual">
+                    <svg id="tree-svg"></svg>
+                </div>
+            </div>
+
+            <!-- Groups Tab -->
+
+            <div x-show="activeTab === 'groups'" class="tab-pane" id="groups-view">
+                <template x-if="groups.length">
+                    <div class="groups-list">
+                        <template x-for="(g, i) in groups" :key="i">
+                            <div class="group-item" x-data="{ editing: false, newName: g.name, expanded: false }">
+                                <div class="group-item__main">
+                                    <span class="group-item__color" :style="'background:' + g.color">
+                                        <input type="color" :value="g.color" @input="setGroupColor(g.name, $event.target.value)" class="group-item__color-input">
+                                    </span>
+                                    <div class="group-item__info">
+                                        <span class="group-item__name" x-show="!editing" @click="editing = true; $nextTick(function() { $refs.nameInput.focus(); $refs.nameInput.select() })" x-text="g.name"></span>
+                                        <input class="group-item__input" type="text" x-show="editing" x-model="newName" x-ref="nameInput" @keyup.enter="renameGroup(g.name, newName); editing = false" @blur="editing = false" @keyup.escape="editing = false">
+                                        <span class="group-item__count" x-text="groupStats(g)"></span>
+                                    </div>
+                                    <button class="group-item__expand" @click="expanded = !expanded" :title="expanded ? 'Collapse' : 'Expand paths'">
+                                        <i class="fas" :class="expanded ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+                                    </button>
+                                    <button class="group-item__delete" @click="deleteGroup(g.name)"><i class="fas fa-times"></i></button>
+                                </div>
+                                <div class="group-paths" x-show="expanded">
+                                    <template x-for="(p, pi) in g.paths" :key="pi">
+                                        <div class="group-paths__item">
+                                            <span class="group-paths__path" x-text="p"></span>
+                                            <button class="group-paths__remove" @click="removePath(g.name, p)"><i class="fas fa-times"></i></button>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </template>
+                <template x-if="!groups.length">
+                    <div class="groups-empty">
+                        <p class="groups-empty__text">No groups yet. Switch to Select mode on the Tree tab and click nodes to create groups.</p>
+                    </div>
+                </template>
+            </div>
+
+            <!-- Stats Tab -->
+
+            <div x-show="activeTab === 'stats'" class="tab-pane" id="stats-view">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <span class="stat-card__label">Files</span>
+                        <span class="stat-card__value" x-text="stats?.files ?? '—'"></span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-card__label">Directories</span>
+                        <span class="stat-card__value" x-text="stats?.dirs ?? '—'"></span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-card__label">Lines of Code</span>
+                        <span class="stat-card__value" x-text="stats?.lines ?? '—'"></span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-card__label">Languages</span>
+                        <span class="stat-card__value" x-text="stats?.languages?.length ?? '—'"></span>
+                    </div>
+                </div>
+
+                <div class="chart-container" id="lang-chart"></div>
+            </div>
+
+            <!-- Tests Tab -->
+
+            <div x-show="activeTab === 'tests'" class="tab-pane" id="tests-view">
+                <div class="test-controls">
+                    <select class="test-controls__select" x-model="testTarget">
+                        <option value="all">All tests</option>
+                        <option value="backend">Backend</option>
+                        <option value="frontend">Frontend</option>
+                    </select>
+
+                    <button class="test-controls__button" @click="runTests()" :disabled="testRunning">
+                        <span x-show="testRunning" class="spinner"></span>
+                        <span x-show="!testRunning">Run</span>
+                    </button>
+                </div>
+
+                <template x-if="testResults">
+                    <div class="test-summary">
+                        <span>Passed: <strong class="test-pass" x-text="testResults.passed ?? 0"></strong></span>
+                        <span>Failed: <strong class="test-fail" x-text="testResults.failed ?? 0"></strong></span>
+                        <span>Skipped: <strong class="test-skip" x-text="testResults.skipped ?? 0"></strong></span>
+                    </div>
+                </template>
+
+                <template x-if="testResults && testResults.output">
+                    <pre class="test-output" x-text="testResults.output"></pre>
+                </template>
+            </div>
+
+            <!-- CI/CD Tab -->
+
+            <div x-show="activeTab === 'cicd'" class="tab-pane" id="cicd-view">
+                <p class="cicd-placeholder">CI/CD integration coming soon</p>
+            </div>
+        </div>
+    </div>
+</template>
+
+{{end}}
+
+{{template "base" .}}
