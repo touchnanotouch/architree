@@ -11,7 +11,7 @@ document.addEventListener("alpine:init", function() {
             loading: false,
             workspacePath: "",
             projectName: "",
-            activeTab: "tree",
+            activeTab: "stats",
             treeData: [],
             stats: null,
             expandedPaths: {},
@@ -19,12 +19,16 @@ document.addEventListener("alpine:init", function() {
             testResults: null,
             testRunning: false,
             chartRendered: false,
+            viewMode: "1",
 
             groups: [],
             selectedPaths: {},
             toolMode: "pan",
             groupName: "",
             groupColorIndex: 0,
+            selectMode: "normal",
+            _dragIndex: null,
+            _dragOverIndex: null,
 
             init: function() {
                 this.applyTheme()
@@ -52,8 +56,15 @@ document.addEventListener("alpine:init", function() {
 
                 if (saved) {
                     try {
-                        this.groups = JSON.parse(saved)
-                        this.groups = this.groups.filter(function(g) { return g.paths && g.paths.length })
+                        var parsed = JSON.parse(saved)
+
+                        parsed.forEach(function(g) {
+                            if (g.paths) {
+                                g.paths = g.paths.map(function(p) { return p.replace(/\\/g, "/") })
+                            }
+                        })
+
+                        this.groups = parsed.filter(function(g) { return g.paths && g.paths.length })
                         this.groupColorIndex = this.groups.length
                     } catch (e) {
                         console.error("Failed to load groups:", e)
@@ -80,25 +91,34 @@ document.addEventListener("alpine:init", function() {
                     this.expandedPaths = {}
                     this._pathType = {}
 
-                    function buildPathMap(nodes) {
+                    function normalizePaths(nodes) {
                         for (var i = 0; i < nodes.length; i++) {
+                            nodes[i].path = nodes[i].path.replace(/\\/g, "/")
                             this._pathType[nodes[i].path] = nodes[i].type
 
                             if (nodes[i].children && nodes[i].children.length) {
-                                buildPathMap.call(this, nodes[i].children)
+                                normalizePaths.call(this, nodes[i].children)
                             }
                         }
                     }
 
-                    buildPathMap.call(this, this.treeData)
+                    normalizePaths.call(this, this.treeData)
 
+                    resetVisualCache()
                     this.chartRendered = false
                     this.scanned = true
-                    this.activeTab = "tree"
+                    this.activeTab = "stats"
 
                     var self = this
 
-                    this.$nextTick(function() { self.renderTreeView() })
+                    this.$nextTick(function() {
+                        renderSidebarTree(
+                            "tree-container", self.treeData, self.expandedPaths,
+                            function(p) { self.toggleExpand(p) },
+                            self.groups
+                        )
+                        self.renderActiveView()
+                    })
                 } catch (err) {
                     console.error("Scan failed:", err)
                 } finally {
@@ -138,7 +158,8 @@ document.addEventListener("alpine:init", function() {
                     "#tree-svg", this.treeData, this.expandedPaths,
                     function(p) { self.toggleExpand(p) },
                     this.toolMode, this.selectedPaths, this.groups,
-                    function(p) { self.toggleSelect(p) }
+                    function(p) { self.toggleSelect(p) },
+                    this.viewMode
                 )
             },
 
@@ -158,7 +179,8 @@ document.addEventListener("alpine:init", function() {
                         "#tree-svg", this.treeData, this.expandedPaths,
                         function(p) { self.toggleExpand(p) },
                         this.toolMode, this.selectedPaths, this.groups,
-                        function(p) { self.toggleSelect(p) }
+                        function(p) { self.toggleSelect(p) },
+                        this.viewMode
                     )
                 }
             },
@@ -206,14 +228,56 @@ document.addEventListener("alpine:init", function() {
                 if (path === null) {
                     this.selectedPaths = {}
                 } else {
-                    this.selectedPaths[path] = !this.selectedPaths[path]
+                    var key = path.replace(/\\/g, "/")
 
-                    if (!this.selectedPaths[path]) {
-                        delete this.selectedPaths[path]
+                    this.selectedPaths[key] = !this.selectedPaths[key]
+
+                    if (!this.selectedPaths[key]) {
+                        delete this.selectedPaths[key]
                     }
                 }
 
                 this.renderTreeView()
+            },
+
+            _collectAncestors: function(paths) {
+                var result = {}
+
+                for (var i = 0; i < paths.length; i++) {
+                    var parts = paths[i].replace(/\\/g, "/").split("/").filter(Boolean)
+                    var cur = ""
+
+                    for (var j = 0; j < parts.length; j++) {
+                        cur = cur ? cur + "/" + parts[j] : parts[j]
+                        result[cur] = true
+                    }
+                }
+
+                return Object.keys(result)
+            },
+
+            _collectDescendants: function(paths, nodes) {
+                var result = {}
+
+                for (var i = 0; i < paths.length; i++) {
+                    result[paths[i]] = true
+                    this._walkDescendants(paths[i], nodes, result)
+                }
+
+                return Object.keys(result)
+            },
+
+            _walkDescendants: function(path, nodes, result) {
+                for (var i = 0; i < nodes.length; i++) {
+                    if (nodes[i].path.indexOf(path + "/") === 0 ||
+                        (nodes[i].path === path && nodes[i].children)) {
+                        result[nodes[i].path] = true
+                    }
+
+                    if (nodes[i].children) {
+                        this._walkDescendants(path, nodes[i].children, result)
+                    }
+                }
             },
 
             createGroup: function() {
@@ -229,7 +293,18 @@ document.addEventListener("alpine:init", function() {
 
                 this.groupColorIndex++
 
-                var newPaths = selected.slice()
+                var newPaths
+
+                switch (this.selectMode) {
+                    case "recursive":
+                        newPaths = this._collectAncestors(selected)
+                        break
+                    case "descendant":
+                        newPaths = this._collectDescendants(selected, this.treeData)
+                        break
+                    default:
+                        newPaths = selected.slice()
+                }
 
                 var existing = null
                 var existingIndex = -1
@@ -352,6 +427,32 @@ document.addEventListener("alpine:init", function() {
                 this.groups = this.groups.filter(function(g) { return g.name !== name })
                 this.saveGroups()
                 this.renderTreeView()
+            },
+
+            onDragStart: function(index, event) {
+                this._dragIndex = index
+                event.dataTransfer.effectAllowed = "move"
+            },
+
+            onDrop: function(index) {
+                if (this._dragIndex === null || this._dragIndex === index) {
+                    this._dragIndex = null
+                    return
+                }
+
+                var groups = this.groups.slice()
+                var item = groups.splice(this._dragIndex, 1)[0]
+                var target = index
+
+                groups.splice(target, 0, item)
+                this.groups = groups
+                this._dragIndex = null
+                this.saveGroups()
+                this.renderTreeView()
+            },
+
+            onDragEnd: function() {
+                this._dragIndex = null
             },
 
             groupStats: function(g) {

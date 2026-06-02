@@ -411,6 +411,101 @@
     gap: 0.375rem;
 }
 
+.tree-toolbar__spacer {
+    /* Flex */
+
+    flex: 1;
+}
+
+.tree-toolbar__sep {
+    /* Box Model */
+
+    width: 1px;
+    height: 1.5rem;
+
+    /* Visual */
+
+    background: var(--border);
+
+    /* Box Model */
+
+    flex-shrink: 0;
+}
+
+.view-slider {
+    /* Flex */
+
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    /* Visual */
+
+    cursor: pointer;
+}
+
+.view-slider__label {
+    /* Typography */
+
+    font-size: var(--text-xs);
+
+    /* Visual */
+
+    color: var(--text-secondary);
+    user-select: none;
+}
+
+.view-slider__label--active {
+    /* Visual */
+
+    color: var(--accent);
+}
+
+.view-slider__track {
+    /* Positioning */
+
+    position: relative;
+
+    /* Box Model */
+
+    width: 2rem;
+    height: 1rem;
+
+    /* Visual */
+
+    border-radius: 0.5rem;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border);
+}
+
+.view-slider__thumb {
+    /* Positioning */
+
+    position: absolute;
+    top: 0.085rem;
+    left: 0.125rem;
+
+    /* Box Model */
+
+    width: 0.75rem;
+    height: 0.75rem;
+
+    /* Visual */
+
+    border-radius: 50%;
+    background: var(--accent);
+
+    /* Animation */
+
+    transition: left var(--transition-fast);
+}
+
+.view-slider__thumb--right {
+    /* Positioning */
+
+    left: calc(100% - 0.125rem - 0.75rem);
+}
+
 .toolbar-btn {
     /* Box Model */
 
@@ -427,10 +522,6 @@
     background: var(--bg);
     color: var(--text-secondary);
     cursor: pointer;
-
-    /* Animation */
-
-    transition: all var(--transition-fast);
 }
 
 .toolbar-btn:hover {
@@ -499,6 +590,13 @@
     border-color: var(--accent);
 }
 
+.tree-toolbar__select-modes {
+    /* Flex */
+
+    display: flex;
+    align-items: center;
+}
+
 .toolbar-count {
     /* Typography */
 
@@ -522,7 +620,6 @@
 
     background: var(--bg-secondary);
     overflow: hidden;
-    cursor: grab;
 }
 
 .tree-visual:active {
@@ -555,6 +652,69 @@
     fill: none;
     stroke: var(--border);
     stroke-width: 2px;
+}
+
+.group-regions {
+    /* Visual */
+
+    pointer-events: none;
+}
+
+/* Forest View */
+
+.forest-link {
+    /* Visual */
+
+    fill: none;
+    stroke: var(--border);
+    stroke-width: 1.5;
+    stroke-opacity: 0.2;
+}
+
+.forest-node {
+    /* Visual */
+
+    cursor: default;
+}
+
+.forest-node--default {
+    /* Visual */
+
+    fill: var(--text-secondary);
+}
+
+.forest-node--selected {
+    /* Visual */
+
+    stroke: var(--accent) !important;
+    stroke-width: 2.5px !important;
+    fill-opacity: 1 !important;
+}
+
+.forest-label {
+    /* Typography */
+
+    font-family: var(--font-mono);
+    font-size: 9px;
+
+    /* Visual */
+
+    fill: var(--text);
+    stroke: none;
+    user-select: none;
+    pointer-events: none;
+}
+
+.forest-group-label {
+    /* Typography */
+
+    font-family: var(--font-mono);
+    font-size: 11px;
+
+    /* Visual */
+
+    user-select: none;
+    pointer-events: none;
 }
 
 .tree-visual-node {
@@ -630,6 +790,19 @@
     background: var(--bg-secondary);
     border: 1px solid var(--border);
     border-radius: var(--radius-md);
+}
+
+.group-item {
+    /* Visual */
+
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.group-item--drag-over {
+    /* Visual */
+
+    border-color: var(--accent);
+    box-shadow: 0 0 0 1px var(--accent);
 }
 
 .group-item__main {

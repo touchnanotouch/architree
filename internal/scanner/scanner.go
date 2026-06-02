@@ -33,15 +33,18 @@ type Language struct {
 }
 
 var skipDirs = map[string]bool{
-	".git":       true,
+	".git":        true,
 	"node_modules": true,
-	"vendor":     true,
-	".idea":      true,
-	".vscode":    true,
+	"vendor":      true,
+	".idea":       true,
+	".vscode":     true,
 	"__pycache__": true,
-	"target":     true,
-	"dist":       true,
-	"build":      true,
+	"target":      true,
+	"dist":        true,
+	"build":       true,
+	"env":         true,
+	".venv":       true,
+	"venv":        true,
 }
 
 func Scan(root string) (*Result, error) {

@@ -128,6 +128,7 @@
     /* Box Model */
 
     padding: var(--space-xs) var(--space-sm);
+    min-width: 2.5rem;
 
     /* Typography */
 
@@ -141,7 +142,7 @@
     color: var(--text);
     cursor: pointer;
 
-    /* Flex (for SVG centering) */
+    /* Flex */
 
     display: inline-flex;
     align-items: center;

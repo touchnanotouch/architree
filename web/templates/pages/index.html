@@ -17,9 +17,9 @@
         <!-- Tabs -->
 
         <div class="tabs">
-            <button class="tab" :class="{ 'tab--active': activeTab === 'tree' }" @click="switchTab('tree')">Tree</button>
-            <button class="tab" :class="{ 'tab--active': activeTab === 'groups' }" @click="switchTab('groups')">Groups</button>
             <button class="tab" :class="{ 'tab--active': activeTab === 'stats' }" @click="switchTab('stats')">Stats</button>
+            <button class="tab" :class="{ 'tab--active': activeTab === 'tree' }" @click="switchTab('tree')">Structure</button>
+            <button class="tab" :class="{ 'tab--active': activeTab === 'groups' }" @click="switchTab('groups')">Groups</button>
             <button class="tab" :class="{ 'tab--active': activeTab === 'tests' }" @click="switchTab('tests')">Tests</button>
             <button class="tab" :class="{ 'tab--active': activeTab === 'cicd' }" @click="switchTab('cicd')">CI/CD</button>
         </div>
@@ -39,11 +39,31 @@
                     </div>
                     <template x-if="toolMode === 'select'">
                         <div class="tree-toolbar__group">
+                            <span class="tree-toolbar__select-modes">
+                                <button class="toolbar-btn" :class="{'toolbar-btn--active': selectMode === 'normal'}" @click="selectMode = 'normal'" title="Only the selected paths">Norm</button>
+                                <button class="toolbar-btn" :class="{'toolbar-btn--active': selectMode === 'recursive'}" @click="selectMode = 'recursive'" title="Include all ancestor directories">Recur</button>
+                                <button class="toolbar-btn" :class="{'toolbar-btn--active': selectMode === 'descendant'}" @click="selectMode = 'descendant'" title="Include all descendants">Deep</button>
+                            </span>
+                        </div>
+                    </template>
+                    <template x-if="toolMode === 'select'">
+                        <div class="tree-toolbar__group">
                             <input class="toolbar-input" type="text" x-model="groupName" placeholder="Group name" @keyup.enter="createGroup">
                             <button class="toolbar-btn toolbar-btn--action" @click="createGroup" :disabled="!Object.keys(selectedPaths).length">Create</button>
                             <span class="toolbar-count" x-show="Object.keys(selectedPaths).length" x-text="Object.keys(selectedPaths).length + ' selected'"></span>
                         </div>
                     </template>
+                    <div class="tree-toolbar__spacer"></div>
+                    <div class="tree-toolbar__sep"></div>
+                    <div class="tree-toolbar__group">
+                        <label class="view-slider">
+                            <span class="view-slider__label" :class="{'view-slider__label--active': viewMode === '1'}">Tree</span>
+                            <div class="view-slider__track" @click="viewMode = viewMode === '1' ? '2' : '1'; renderTreeView()">
+                                <div class="view-slider__thumb" :class="{'view-slider__thumb--right': viewMode === '2'}"></div>
+                            </div>
+                            <span class="view-slider__label" :class="{'view-slider__label--active': viewMode === '2'}">Forest</span>
+                        </label>
+                    </div>
                 </div>
                 <div class="tree-visual">
                     <svg id="tree-svg"></svg>
@@ -56,7 +76,7 @@
                 <template x-if="groups.length">
                     <div class="groups-list">
                         <template x-for="(g, i) in groups" :key="i">
-                            <div class="group-item" x-data="{ editing: false, newName: g.name, expanded: false }">
+                            <div class="group-item" x-data="{ editing: false, newName: g.name, expanded: false }" draggable="true" @dragstart="onDragStart(i, $event)" @dragover.prevent="_dragOverIndex = i" @dragleave="_dragOverIndex = null" @drop="onDrop(i); _dragOverIndex = null" @dragend="onDragEnd()" :class="{ 'group-item--drag-over': _dragOverIndex === i }">
                                 <div class="group-item__main">
                                     <span class="group-item__color" :style="'background:' + g.color">
                                         <input type="color" :value="g.color" @input="setGroupColor(g.name, $event.target.value)" class="group-item__color-input">
