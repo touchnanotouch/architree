@@ -709,7 +709,7 @@
     /* Typography */
 
     font-family: var(--font-mono);
-    font-size: 11px;
+    font-size: var(--text-xs);
 
     /* Visual */
 
@@ -741,7 +741,7 @@
     /* Typography */
 
     font-family: var(--font-mono);
-    font-size: 11px;
+    font-size: var(--text-xs);
 
     /* Visual */
 

@@ -1,89 +1,111 @@
 function renderSidebarTree(containerId, nodes, expandedPaths, onToggle, groups) {
-    var container = document.getElementById(containerId)
+    var container = document.getElementById(containerId);
 
-    if (!container) return
+    if (!container) {
+        return;
+    }
 
-    var pathColor = {}
+    var pathColor = {};
 
     if (groups) {
         for (var gi = 0; gi < groups.length; gi++) {
-            var g = groups[gi]
+            var g = groups[gi];
 
             for (var pi = 0; pi < g.paths.length; pi++) {
-                pathColor[g.paths[pi]] = g.color
+                pathColor[g.paths[pi]] = g.color;
             }
         }
     }
 
-    container.innerHTML = buildTreeHTML(nodes, expandedPaths, pathColor)
-    container.querySelectorAll(".tree-node-header[data-path]").forEach(function(el) {
-        el.addEventListener("click", function(e) {
-            e.stopPropagation()
+    container.innerHTML = buildTreeHTML(nodes, expandedPaths, pathColor);
 
-            var path = e.currentTarget.dataset.path
-            var type = e.currentTarget.dataset.type
+    if (!container._treeDelegation) {
+        container.addEventListener("click", function(e) {
+            var header = e.target.closest(".tree-node-header[data-path]");
 
-            if (type === "dir") onToggle(path)
-        })
-    })
+            if (!header) {
+                return;
+            }
+
+            var path = header.dataset.path;
+            var type = header.dataset.type;
+
+            if (type === "dir") {
+                onToggle(path);
+            }
+        });
+
+        container._treeDelegation = true;
+    }
 }
 
 function buildTreeHTML(nodes, expandedPaths, pathColor) {
-    if (!nodes || !nodes.length) return '<p class="sidebar__placeholder">No workspace selected</p>'
+    if (!nodes || !nodes.length) {
+        return '<p class="sidebar__placeholder">No workspace selected</p>';
+    }
 
-    var html = '<ul class="tree">'
+    var html = '<ul class="tree">';
 
     for (var i = 0; i < nodes.length; i++) {
-        var node = nodes[i]
-        var isDir = node.type === "dir"
-        var hasChildren = isDir && node.children && node.children.length
-        var expanded = expandedPaths && expandedPaths[node.path]
-        var color = pathColor && pathColor[node.path]
+        var node = nodes[i];
+        var isDir = node.type === "dir";
+        var hasChildren = isDir && node.children && node.children.length;
+        var expanded = expandedPaths[node.path];
+        var color = pathColor && pathColor[node.path];
 
-        html += '<li class="tree-node">'
-        html += '<div class="tree-node-header" data-path="' + escAttr(node.path) + '" data-type="' + node.type + '">'
+        html += '<li class="tree-node">';
+        html += '<div class="tree-node-header" data-path="' + escAttr(node.path) + '" data-type="' + node.type + '">';
 
         if (isDir) {
-            html += '<span class="tree-toggle">'
+            html += '<span class="tree-toggle">';
 
             if (hasChildren) {
                 html += expanded
                     ? '<i class="fas fa-chevron-down"></i>'
-                    : '<i class="fas fa-chevron-right"></i>'
+                    : '<i class="fas fa-chevron-right"></i>';
             }
 
-            html += "</span>"
+            html += "</span>";
         }
 
-        html += '<span class="tree-icon tree-icon--' + node.type + '"><i class="fas fa-fw ' + (isDir ? "fa-folder" : "fa-file") + '"></i></span>'
+        html += '<span class="tree-icon tree-icon--' + node.type + '"><i class="fas fa-fw ' + (isDir ? "fa-folder" : "fa-file") + '"></i></span>';
 
         if (color) {
-            html += '<span class="tree-group-dot" style="background:' + color + '"></span>'
+            html += '<span class="tree-group-dot" style="background:' + color + '"></span>';
         }
 
-        html += '<span class="tree-name">' + escHtml(node.name) + "</span>"
-        html += "</div>"
+        html += '<span class="tree-name">' + escHtml(node.name) + "</span>";
+        html += "</div>";
 
         if (hasChildren) {
-            html += '<ul class="tree-children" style="display:' + (expanded ? "block" : "none") + '">'
-            html += buildTreeHTML(node.children, expandedPaths, pathColor)
-            html += "</ul>"
+            html += '<ul class="tree-children" style="display:' + (expanded ? "block" : "none") + '">';
+            html += buildTreeHTML(node.children, expandedPaths, pathColor);
+            html += "</ul>";
         }
 
-        html += "</li>"
+        html += "</li>";
     }
 
-    html += "</ul>"
-    return html
+    html += "</ul>";
+    return html;
 }
 
-function escHtml(str) {
-    var d = document.createElement("div")
+var _htmlEsc = document.createElement("div");
 
-    d.textContent = str
-    return d.innerHTML
+function escHtml(str) {
+    _htmlEsc.textContent = str;
+    return _htmlEsc.innerHTML;
 }
 
 function escAttr(str) {
-    return str.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+    return str.replace(/[&"<>]/g, function(c) {
+        return _escMap[c];
+    });
 }
+
+var _escMap = {
+    "&": "&amp;",
+    "\"": "&quot;",
+    "<": "&lt;",
+    ">": "&gt;",
+};

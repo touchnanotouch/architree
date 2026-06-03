@@ -41,8 +41,8 @@
                         <div class="tree-toolbar__group">
                             <span class="tree-toolbar__select-modes">
                                 <button class="toolbar-btn" :class="{'toolbar-btn--active': selectMode === 'normal'}" @click="selectMode = 'normal'" title="Only the selected paths">Norm</button>
-                                <button class="toolbar-btn" :class="{'toolbar-btn--active': selectMode === 'recursive'}" @click="selectMode = 'recursive'" title="Include all ancestor directories">Recur</button>
-                                <button class="toolbar-btn" :class="{'toolbar-btn--active': selectMode === 'descendant'}" @click="selectMode = 'descendant'" title="Include all descendants">Deep</button>
+                                <button class="toolbar-btn" :class="{'toolbar-btn--active': selectMode === 'asc'}" @click="selectMode = 'asc'" title="Include all ancestors up to root">Asc</button>
+                                <button class="toolbar-btn" :class="{'toolbar-btn--active': selectMode === 'desc'}" @click="selectMode = 'desc'" title="Include all descendants">Desc</button>
                             </span>
                         </div>
                     </template>

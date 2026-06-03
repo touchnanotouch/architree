@@ -146,8 +146,8 @@
 .tree-group-dot {
     /* Box Model */
 
-    width: 8px;
-    height: 8px;
+    width: var(--space-sm);
+    height: var(--space-sm);
 
     /* Visual */
 
