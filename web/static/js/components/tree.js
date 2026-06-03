@@ -1,17 +1,17 @@
 function renderSidebarTree(containerId, nodes, expandedPaths, onToggle, groups) {
-    var container = document.getElementById(containerId);
+    const container = document.getElementById(containerId);
 
     if (!container) {
         return;
     }
 
-    var pathColor = {};
+    const pathColor = {};
 
     if (groups) {
-        for (var gi = 0; gi < groups.length; gi++) {
-            var g = groups[gi];
+        for (let gi = 0; gi < groups.length; gi++) {
+            const g = groups[gi];
 
-            for (var pi = 0; pi < g.paths.length; pi++) {
+            for (let pi = 0; pi < g.paths.length; pi++) {
                 pathColor[g.paths[pi]] = g.color;
             }
         }
@@ -20,15 +20,15 @@ function renderSidebarTree(containerId, nodes, expandedPaths, onToggle, groups) 
     container.innerHTML = buildTreeHTML(nodes, expandedPaths, pathColor);
 
     if (!container._treeDelegation) {
-        container.addEventListener("click", function(e) {
-            var header = e.target.closest(".tree-node-header[data-path]");
+        container.addEventListener("click", e => {
+            const header = e.target.closest(".tree-node-header[data-path]");
 
             if (!header) {
                 return;
             }
 
-            var path = header.dataset.path;
-            var type = header.dataset.type;
+            const path = header.dataset.path;
+            const type = header.dataset.type;
 
             if (type === "dir") {
                 onToggle(path);
@@ -44,14 +44,14 @@ function buildTreeHTML(nodes, expandedPaths, pathColor) {
         return '<p class="sidebar__placeholder">No workspace selected</p>';
     }
 
-    var html = '<ul class="tree">';
+    let html = '<ul class="tree">';
 
-    for (var i = 0; i < nodes.length; i++) {
-        var node = nodes[i];
-        var isDir = node.type === "dir";
-        var hasChildren = isDir && node.children && node.children.length;
-        var expanded = expandedPaths[node.path];
-        var color = pathColor && pathColor[node.path];
+    for (let i = 0; i < nodes.length; i++) {
+        const node = nodes[i];
+        const isDir = node.type === "dir";
+        const hasChildren = isDir && node.children && node.children.length;
+        const expanded = expandedPaths[node.path];
+        const color = pathColor && pathColor[node.path];
 
         html += '<li class="tree-node">';
         html += '<div class="tree-node-header" data-path="' + escAttr(node.path) + '" data-type="' + node.type + '">';
@@ -90,7 +90,7 @@ function buildTreeHTML(nodes, expandedPaths, pathColor) {
     return html;
 }
 
-var _htmlEsc = document.createElement("div");
+const _htmlEsc = document.createElement("div");
 
 function escHtml(str) {
     _htmlEsc.textContent = str;
@@ -98,12 +98,10 @@ function escHtml(str) {
 }
 
 function escAttr(str) {
-    return str.replace(/[&"<>]/g, function(c) {
-        return _escMap[c];
-    });
+    return str.replace(/[&"<>]/g, c => _escMap[c]);
 }
 
-var _escMap = {
+const _escMap = {
     "&": "&amp;",
     "\"": "&quot;",
     "<": "&lt;",

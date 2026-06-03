@@ -10,9 +10,14 @@
 
     <title>ArchiTree</title>
 
-    <!-- CSS Loader -->
+    <!-- Core CSS -->
 
-    <link rel="stylesheet" href="/static/css/load.css">
+    <link rel="stylesheet" href="/static/css/core/vars.css">
+    <link rel="stylesheet" href="/static/css/core/reset.css">
+    <link rel="stylesheet" href="/static/css/core/layout.css">
+    <link rel="stylesheet" href="/static/css/components/topbar.css">
+    <link rel="stylesheet" href="/static/css/components/sidebar.css">
+    <link rel="stylesheet" href="/static/css/components/page.css">
 
     <!-- Font Awesome -->
 
@@ -41,9 +46,16 @@
         </div>
     </div>
 
-    <!-- JS Loader -->
+    <!-- JS -->
 
-    <script src="/static/js/load.js" defer></script>
+    <script defer src="/static/js/core/api.js"></script>
+    <script defer src="/static/js/lib/d3.v7.min.js"></script>
+    <script defer src="/static/js/components/tree.js"></script>
+    <script defer src="/static/js/components/tree-visual.js"></script>
+    <script defer src="/static/js/components/chart.js"></script>
+    <script defer src="/static/js/components/tests.js"></script>
+    <script defer src="/static/js/core/main.js"></script>
+    <script defer src="/static/js/lib/alpine.min.js"></script>
 </body>
 </html>
 

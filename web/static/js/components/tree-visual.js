@@ -1,13 +1,13 @@
-var _zoomT = null;
-var _zoomTree = null;
-var _zoomForest = null;
-var _resizeHandler = null;
-var _lastViewMode = null;
-var _initialized = false;
-var _stableWeights = {};
-var _stableWedges = [];
+let _zoomT = null;
+let _zoomTree = null;
+let _zoomForest = null;
+let _resizeHandler = null;
+let _lastViewMode = null;
+let _initialized = false;
+let _stableWeights = {};
+let _stableWedges = [];
 
-var _NODE_R = { dir: 12, file: 7 };
+const _NODE_R = { dir: 12, file: 7 };
 
 function resetVisualCache() {
     _initialized = false;
@@ -24,10 +24,10 @@ function initStableLayout(nodes) {
 
     // Sort first-level children: dirs first (by name), then files (by name)
 
-    var dirs = [];
-    var files = [];
+    let dirs = [];
+    let files = [];
 
-    for (var i = 0; i < nodes.length; i++) {
+    for (let i = 0; i < nodes.length; i++) {
         if (nodes[i].type === "dir") {
             dirs.push(nodes[i]);
         } else {
@@ -42,17 +42,17 @@ function initStableLayout(nodes) {
 
     nodes.length = 0;
 
-    for (var di = 0; di < dirs.length; di++) { nodes.push(dirs[di]); }
-    for (var fi = 0; fi < files.length; fi++) { nodes.push(files[fi]); }
+    for (let di = 0; di < dirs.length; di++) { nodes.push(dirs[di]); }
+    for (let fi = 0; fi < files.length; fi++) { nodes.push(files[fi]); }
 
     function computeWeight(n) {
-        var w = 1;
+        let w = 1;
 
         if (n.children && n.children.length) {
-            var childDirs = [];
-            var childFiles = [];
+            let childDirs = [];
+            let childFiles = [];
 
-            for (var ci = 0; ci < n.children.length; ci++) {
+            for (let ci = 0; ci < n.children.length; ci++) {
                 if (n.children[ci].type === "dir") {
                     childDirs.push(n.children[ci]);
                 } else {
@@ -65,7 +65,7 @@ function initStableLayout(nodes) {
 
             n.children = childDirs.concat(childFiles);
 
-            for (var ci = 0; ci < n.children.length; ci++) {
+            for (let ci = 0; ci < n.children.length; ci++) {
                 w += computeWeight(n.children[ci]);
             }
         }
@@ -74,22 +74,22 @@ function initStableLayout(nodes) {
         return w;
     }
 
-    for (var ni = 0; ni < nodes.length; ni++) {
+    for (let ni = 0; ni < nodes.length; ni++) {
         computeWeight(nodes[ni]);
     }
 
     // Compute wedges for first-level children (compressed by sqrt to prevent domination)
 
-    var sqrtTotal = 0;
+    let sqrtTotal = 0;
 
-    for (var i = 0; i < nodes.length; i++) {
+    for (let i = 0; i < nodes.length; i++) {
         sqrtTotal += Math.sqrt(_stableWeights[nodes[i].path] || 1);
     }
 
-    var cum = 0;
+    let cum = 0;
 
-    for (var i = 0; i < nodes.length; i++) {
-        var prop = Math.sqrt(_stableWeights[nodes[i].path] || 1) / sqrtTotal;
+    for (let i = 0; i < nodes.length; i++) {
+        let prop = Math.sqrt(_stableWeights[nodes[i].path] || 1) / sqrtTotal;
 
         _stableWedges.push({
             startAngle: cum * 2 * Math.PI,
@@ -105,37 +105,37 @@ function placeChildrenStable(wNodes, startAngle, endAngle, depth, dStep) {
         return;
     }
 
-    var totalWeight = 0;
+    let totalWeight = 0;
 
-    for (var i = 0; i < wNodes.length; i++) {
+    for (let i = 0; i < wNodes.length; i++) {
         totalWeight += _stableWeights[wNodes[i].data.path] || 1;
     }
 
-    var range = endAngle - startAngle;
-    var cum = startAngle;
-    var adjusted = [];
+    let range = endAngle - startAngle;
+    let cum = startAngle;
+    let adjusted = [];
 
-    for (var i = 0; i < wNodes.length; i++) {
-        var n = wNodes[i];
-        var w = (_stableWeights[n.data.path] || 1) / totalWeight;
-        var midAngle = cum + range * w / 2;
+    for (let i = 0; i < wNodes.length; i++) {
+        let n = wNodes[i];
+        let w = (_stableWeights[n.data.path] || 1) / totalWeight;
+        let midAngle = cum + range * w / 2;
         adjusted.push({ node: n, angle: midAngle });
         cum += range * w;
     }
 
     // Enforce minimum angular gap so circles never overlap
 
-    var r = depth * dStep;
+    let r = depth * dStep;
 
     if (r > 0 && adjusted.length > 1) {
-        for (var pass = 0; pass < 5; pass++) {
-            var moved = false;
+        for (let pass = 0; pass < 5; pass++) {
+            let moved = false;
 
-            for (var i = 1; i < adjusted.length; i++) {
-                var cr = _NODE_R[adjusted[i].node.data.type] || 7;
-                var pr = _NODE_R[adjusted[i - 1].node.data.type] || 7;
-                var minGap = (cr + pr + 4) / r;
-                var gap = adjusted[i].angle - adjusted[i - 1].angle;
+            for (let i = 1; i < adjusted.length; i++) {
+                let cr = _NODE_R[adjusted[i].node.data.type] || 7;
+                let pr = _NODE_R[adjusted[i - 1].node.data.type] || 7;
+                let minGap = (cr + pr + 4) / r;
+                let gap = adjusted[i].angle - adjusted[i - 1].angle;
 
                 if (gap < minGap) {
                     adjusted[i].angle = adjusted[i - 1].angle + minGap;
@@ -148,39 +148,39 @@ function placeChildrenStable(wNodes, startAngle, endAngle, depth, dStep) {
 
         // Compress back into wedge if overflow
 
-        var lastAngle = adjusted[adjusted.length - 1].angle;
+        let lastAngle = adjusted[adjusted.length - 1].angle;
 
         if (lastAngle > endAngle) {
-            var scale = (endAngle - startAngle) / (lastAngle - startAngle);
+            let scale = (endAngle - startAngle) / (lastAngle - startAngle);
 
-            for (var i = 0; i < adjusted.length; i++) {
+            for (let i = 0; i < adjusted.length; i++) {
                 adjusted[i].angle = startAngle + (adjusted[i].angle - startAngle) * scale;
             }
         }
     }
 
-    for (var i = 0; i < adjusted.length; i++) {
+    for (let i = 0; i < adjusted.length; i++) {
         adjusted[i].node._x = adjusted[i].angle;
         adjusted[i].node._y = depth * dStep;
 
-        var child = adjusted[i].node;
+        let child = adjusted[i].node;
 
         if (child.children && child.children.length) {
-            var childStart = i === 0 ? startAngle : (adjusted[i - 1].angle + adjusted[i].angle) / 2;
-            var childEnd = i === adjusted.length - 1 ? endAngle : (adjusted[i].angle + adjusted[i + 1].angle) / 2;
+            let childStart = i === 0 ? startAngle : (adjusted[i - 1].angle + adjusted[i].angle) / 2;
+            let childEnd = i === adjusted.length - 1 ? endAngle : (adjusted[i].angle + adjusted[i + 1].angle) / 2;
             placeChildrenStable(child.children, childStart, childEnd, depth + 1, dStep);
         }
     }
 }
 
 function adjustRadiusToFitLabels(root, maxDepth, svgW, svgH) {
-    var radius = Math.min(svgW, svgH) / 2 - 10;
+    let radius = Math.min(svgW, svgH) / 2 - 10;
 
-    for (var iter = 0; iter < 5; iter++) {
-        var dStep = radius / Math.max(maxDepth, 1);
+    for (let iter = 0; iter < 5; iter++) {
+        let dStep = radius / Math.max(maxDepth, 1);
         if (dStep < 40) { dStep = 40; }
 
-        var labelWidths = {};
+        let labelWidths = {};
 
         root.each(function(d) {
             if (d.depth === 0) { return; }
@@ -188,7 +188,7 @@ function adjustRadiusToFitLabels(root, maxDepth, svgW, svgH) {
             labelWidths[d.depth] += (d.data.name || "").length * 7 + 10;
         });
 
-        var circleDiameters = {};
+        let circleDiameters = {};
 
         root.each(function(d) {
             if (d.depth === 0) { return; }
@@ -196,12 +196,12 @@ function adjustRadiusToFitLabels(root, maxDepth, svgW, svgH) {
             circleDiameters[d.depth] += d.data.type === "dir" ? 24 : 14;
         });
 
-        var needsMore = false;
+        let needsMore = false;
 
-        for (var dep = 1; dep <= maxDepth; dep++) {
-            var r = dep * dStep;
-            var circumference = 2 * Math.PI * r;
-            var needed = labelWidths[dep] || 0;
+        for (let dep = 1; dep <= maxDepth; dep++) {
+            let r = dep * dStep;
+            let circumference = 2 * Math.PI * r;
+            let needed = labelWidths[dep] || 0;
 
             if (needed > circumference * 0.5) {
                 needsMore = true;
@@ -222,8 +222,8 @@ function adjustRadiusToFitLabels(root, maxDepth, svgW, svgH) {
 }
 
 function computeVisibleLabels(root, depthStep) {
-    var visible = {};
-    var byDepth = {};
+    let visible = {};
+    let byDepth = {};
 
     root.each(function(d) {
         if (d.depth === 0) { return; }
@@ -231,31 +231,31 @@ function computeVisibleLabels(root, depthStep) {
         byDepth[d.depth].push(d);
     });
 
-    for (var dep in byDepth) {
-        var nodes = byDepth[dep];
+    for (let dep in byDepth) {
+        let nodes = byDepth[dep];
         nodes.sort(function(a, b) { return a.x - b.x; });
 
-        var r = parseInt(dep) * depthStep;
+        let r = parseInt(dep) * depthStep;
         if (r < 1) {
-            for (var ni = 0; ni < nodes.length; ni++) { visible[nodes[ni].data.path] = true; }
+            for (let ni = 0; ni < nodes.length; ni++) { visible[nodes[ni].data.path] = true; }
             continue;
         }
 
-        var circumference = 2 * Math.PI * r;
-        var totalWidth = 0;
+        let circumference = 2 * Math.PI * r;
+        let totalWidth = 0;
 
-        for (var ni = 0; ni < nodes.length; ni++) {
+        for (let ni = 0; ni < nodes.length; ni++) {
             totalWidth += (nodes[ni].data.name || "").length * 7 + 16;
         }
 
         if (totalWidth <= circumference) {
-            for (var ni = 0; ni < nodes.length; ni++) { visible[nodes[ni].data.path] = true; }
+            for (let ni = 0; ni < nodes.length; ni++) { visible[nodes[ni].data.path] = true; }
         } else {
-            var maxFit = Math.floor(circumference / 50);
+            let maxFit = Math.floor(circumference / 50);
             if (maxFit < 1) { maxFit = 1; }
-            var step = Math.ceil(nodes.length / maxFit);
+            let step = Math.ceil(nodes.length / maxFit);
 
-            for (var ni = 0; ni < nodes.length; ni += step) {
+            for (let ni = 0; ni < nodes.length; ni += step) {
                 visible[nodes[ni].data.path] = true;
             }
         }
@@ -265,7 +265,7 @@ function computeVisibleLabels(root, depthStep) {
 }
 
 function renderVisualTree(selector, nodes, expandedPaths, onToggle, toolMode, selectedPaths, groups, onToggleSelect, viewMode) {
-    var svgEl = document.querySelector(selector);
+    let svgEl = document.querySelector(selector);
 
     if (!svgEl) {
         return;
@@ -293,12 +293,12 @@ function renderVisualTree(selector, nodes, expandedPaths, onToggle, toolMode, se
     initStableLayout(nodes);
 
     function filter(nodes) {
-        var out = [];
+        let out = [];
 
-        for (var i = 0; i < nodes.length; i++) {
-            var n = nodes[i];
-            var expand = expandedPaths[n.path];
-            var children = [];
+        for (let i = 0; i < nodes.length; i++) {
+            let n = nodes[i];
+            let expand = expandedPaths[n.path];
+            let children = [];
 
             if (n.children && n.children.length) {
                 children = expand ? filter(n.children) : [];
@@ -310,36 +310,36 @@ function renderVisualTree(selector, nodes, expandedPaths, onToggle, toolMode, se
         return out;
     }
 
-    var rootData = {
+    let rootData = {
         name: "/",
         path: "",
         type: "dir",
         children: filter(nodes),
     };
 
-    var root = d3.hierarchy(rootData);
+    let root = d3.hierarchy(rootData);
 
     if (!root.children || root.children.length === 0) {
         return;
     }
 
-    var parent = svgEl.parentElement;
+    let parent = svgEl.parentElement;
 
     if (!parent) {
         return;
     }
 
-    var svgW = parent.clientWidth || 600;
-    var svgH = parent.clientHeight || 400;
+    let svgW = parent.clientWidth || 600;
+    let svgH = parent.clientHeight || 400;
 
-    var maxDepth = 0;
+    let maxDepth = 0;
 
     root.eachBefore(function(d) {
         if (d.depth > maxDepth) { maxDepth = d.depth; }
     });
 
-    var radius = adjustRadiusToFitLabels(root, maxDepth, svgW, svgH);
-    var depthStep = Math.max(radius / Math.max(maxDepth, 1), 55);
+    let radius = adjustRadiusToFitLabels(root, maxDepth, svgW, svgH);
+    let depthStep = Math.max(radius / Math.max(maxDepth, 1), 55);
 
     if (depthStep < 10) {
         return;
@@ -347,9 +347,9 @@ function renderVisualTree(selector, nodes, expandedPaths, onToggle, toolMode, se
 
     // Position first-level children at fixed wedge centers
 
-    for (var i = 0; i < root.children.length; i++) {
-        var child = root.children[i];
-        var wedge = _stableWedges[i];
+    for (let i = 0; i < root.children.length; i++) {
+        let child = root.children[i];
+        let wedge = _stableWedges[i];
 
         if (wedge) {
             child._x = wedge.centerAngle;
@@ -385,16 +385,16 @@ function renderVisualTree(selector, nodes, expandedPaths, onToggle, toolMode, se
         }
     });
 
-    var visibleLabels = computeVisibleLabels(root, depthStep);
+    let visibleLabels = computeVisibleLabels(root, depthStep);
 
     function project(d) {
-        var r = d.y || 0;
-        var a = (d.x || 0) - Math.PI / 2;
+        let r = d.y || 0;
+        let a = (d.x || 0) - Math.PI / 2;
         return [r * Math.cos(a), r * Math.sin(a)];
     }
 
-    var selectMode = toolMode === "select";
-    var pathColor = {};
+    let selectMode = toolMode === "select";
+    let pathColor = {};
 
     groups && groups.forEach(function(g) {
         g.paths && g.paths.forEach(function(p) {
@@ -402,7 +402,7 @@ function renderVisualTree(selector, nodes, expandedPaths, onToggle, toolMode, se
         });
     });
 
-    var svg = d3.select(selector)
+    let svg = d3.select(selector)
         .attr("width", svgW)
         .attr("height", svgH);
 
@@ -414,8 +414,8 @@ function renderVisualTree(selector, nodes, expandedPaths, onToggle, toolMode, se
         if (!svgEl || !svgEl.parentElement) {
             return;
         }
-        var w = svgEl.parentElement.clientWidth;
-        var h = svgEl.parentElement.clientHeight;
+        let w = svgEl.parentElement.clientWidth;
+        let h = svgEl.parentElement.clientHeight;
         if (w < 10 || h < 10) {
             return;
         }
@@ -444,37 +444,37 @@ function renderVisualTree(selector, nodes, expandedPaths, onToggle, toolMode, se
         return;
     }
 
-    var g = svg.append("g");
+    let g = svg.append("g");
 
     g.selectAll(".tree-link")
         .data(root.links())
         .enter()
         .append("path")
         .attr("class", "tree-link")
-        .attr("d", function(d) {
-            var s = project(d.source);
-            var t = project(d.target);
-            var mx = (s[0] + t[0]) / 2;
-            var my = (s[1] + t[1]) / 2;
+        .attr("d", d => {
+            let s = project(d.source);
+            let t = project(d.target);
+            let mx = (s[0] + t[0]) / 2;
+            let my = (s[1] + t[1]) / 2;
             return "M" + s[0] + "," + s[1] + "Q" + mx + "," + my + " " + t[0] + "," + t[1];
         });
 
-    var node = g.selectAll(".tree-visual-node")
+    let node = g.selectAll(".tree-visual-node")
         .data(root.descendants())
         .enter()
         .append("g")
         .attr("class", "tree-visual-node")
-        .attr("transform", function(d) {
-            var p = project(d);
+        .attr("transform", d => {
+            let p = project(d);
             return "translate(" + p[0] + "," + p[1] + ")";
         });
 
-    var circle = node.append("circle");
+    let circle = node.append("circle");
 
-    circle.attr("r", function(d) { return _NODE_R[d.data.type] || 7; });
+    circle.attr("r", d => _NODE_R[d.data.type] || 7);
 
-    circle.attr("class", function(d) {
-        var cls = d.data.type === "dir" ? "tree-node-dir" : "tree-node-file";
+    circle.attr("class", d => {
+        let cls = d.data.type === "dir" ? "tree-node-dir" : "tree-node-file";
 
         if (selectedPaths && selectedPaths[d.data.path]) {
             cls += " tree-node--selected";
@@ -483,8 +483,8 @@ function renderVisualTree(selector, nodes, expandedPaths, onToggle, toolMode, se
         return cls;
     });
 
-    circle.style("fill", function(d) {
-        var c = pathColor[d.data.path];
+    circle.style("fill", d => {
+        let c = pathColor[d.data.path];
 
         return c || null;
     });
@@ -492,43 +492,41 @@ function renderVisualTree(selector, nodes, expandedPaths, onToggle, toolMode, se
     node.append("text")
         .attr("class", "tree-visual-label")
         .attr("dy", 4)
-        .attr("dx", function(d) {
-            var p = project(d);
+        .attr("dx", d => {
+            let p = project(d);
             return p[0] >= 0 ? 16 : -16;
         })
-        .attr("text-anchor", function(d) {
-            var p = project(d);
+        .attr("text-anchor", d => {
+            let p = project(d);
             return p[0] >= 0 ? "start" : "end";
         })
-        .text(function(d) {
+        .text(d => {
             if (!visibleLabels[d.data.path]) { return ""; }
-            var name = d.data.name;
+            let name = d.data.name;
             return name.length > 15 ? name.substring(0, 12) + "..." : name;
         });
 
     node.append("title")
-        .text(function(d) {
-            return d.data.path || d.data.name;
-        });
+        .text(d => d.data.path || d.data.name);
 
     if (selectMode) {
         parent.classList.add("tree-visual--select");
         node.style("cursor", "pointer");
 
-        node.on("click", function(event, d) {
+        node.on("click", (event, d) => {
             event.stopPropagation();
 
             if (onToggleSelect) { onToggleSelect(d.data.path); }
         });
 
-        svg.on("click", function() {
+        svg.on("click", () => {
             if (onToggleSelect) { onToggleSelect(null); }
         });
     } else {
         parent.classList.remove("tree-visual--select");
 
         node.each(function(d) {
-            var el = d3.select(this);
+            let el = d3.select(this);
 
             if (d.data.type === "dir") {
                 el.style("cursor", "pointer");
@@ -546,35 +544,35 @@ function renderVisualTree(selector, nodes, expandedPaths, onToggle, toolMode, se
         svg.on("click", null);
     }
 
-    var initT;
+    let initT;
 
     if (_zoomT) {
         initT = d3.zoomIdentity
             .scale(_zoomT.k)
             .translate(_zoomT.x / _zoomT.k, _zoomT.y / _zoomT.k);
     } else {
-        var minPx = Infinity, maxPx = -Infinity, minPy = Infinity, maxPy = -Infinity;
+        let minPx = Infinity, maxPx = -Infinity, minPy = Infinity, maxPy = -Infinity;
 
         root.each(function(d) {
-            var p = project(d);
+            let p = project(d);
             if (p[0] < minPx) { minPx = p[0]; }
             if (p[0] > maxPx) { maxPx = p[0]; }
             if (p[1] < minPy) { minPy = p[1]; }
             if (p[1] > maxPy) { maxPy = p[1]; }
         });
 
-        var treeW = maxPx - minPx;
-        var treeH = maxPy - minPy;
-        var centerX = (minPx + maxPx) / 2;
-        var centerY = (minPy + maxPy) / 2;
-        var fitScale = Math.min(
+        let treeW = maxPx - minPx;
+        let treeH = maxPy - minPy;
+        let centerX = (minPx + maxPx) / 2;
+        let centerY = (minPy + maxPy) / 2;
+        let fitScale = Math.min(
             svgW / (treeW + 40),
             svgH / (treeH + 40),
             1.5
         );
 
-        var fitTx = svgW / 2 - centerX * fitScale;
-        var fitTy = svgH / 2 - centerY * fitScale;
+        let fitTx = svgW / 2 - centerX * fitScale;
+        let fitTy = svgH / 2 - centerY * fitScale;
         initT = d3.zoomIdentity
             .translate(fitTx / fitScale, fitTy / fitScale)
             .scale(fitScale);
@@ -584,12 +582,10 @@ function renderVisualTree(selector, nodes, expandedPaths, onToggle, toolMode, se
 
     g.attr("transform", initT);
 
-    var zoom = d3.zoom()
+    let zoom = d3.zoom()
         .scaleExtent([0.1, 5])
-        .filter(function() {
-            return !selectMode;
-        })
-        .on("zoom", function(event) {
+        .filter(() => !selectMode)
+        .on("zoom", event => {
             g.attr("transform", event.transform);
             _zoomT = { x: event.transform.x, y: event.transform.y, k: event.transform.k };
         });
@@ -600,10 +596,10 @@ function renderVisualTree(selector, nodes, expandedPaths, onToggle, toolMode, se
 }
 
 function buildPathLookup(nodes) {
-    var lookup = {};
+    let lookup = {};
 
     function walk(list) {
-        for (var i = 0; i < list.length; i++) {
+        for (let i = 0; i < list.length; i++) {
             lookup[list[i].path] = list[i].type || "dir";
             if (list[i].children) { walk(list[i].children); }
         }
@@ -614,24 +610,24 @@ function buildPathLookup(nodes) {
 }
 
 function buildGroupTree(paths, typeLookup) {
-    var realPaths = {};
+    let realPaths = {};
 
-    for (var pi = 0; pi < paths.length; pi++) {
+    for (let pi = 0; pi < paths.length; pi++) {
         realPaths[paths[pi]] = true;
     }
 
-    var root = { name: "", path: "", type: "dir", children: [], _real: false, _map: {} };
+    let root = { name: "", path: "", type: "dir", children: [], _real: false, _map: {} };
 
     paths.forEach(function(path) {
-        var parts = path.replace(/\\/g, "/").split("/").filter(Boolean);
-        var current = root;
+        let parts = path.replace(/\\/g, "/").split("/").filter(Boolean);
+        let current = root;
 
         parts.forEach(function(part, i) {
-            var childPath = parts.slice(0, i + 1).join("/");
-            var existing = current._map[part];
+            let childPath = parts.slice(0, i + 1).join("/");
+            let existing = current._map[part];
 
             if (!existing) {
-                var type = typeLookup[childPath] || "dir";
+                let type = typeLookup[childPath] || "dir";
 
                 existing = {
                     name: part,
@@ -661,31 +657,31 @@ function renderForest(svg, groups, allNodes, svgW, svgH, toolMode, selectedPaths
         return;
     }
 
-    var selectMode = toolMode === "select";
-    var typeLookup = buildPathLookup(allNodes);
-    var cx = svgW / 2;
-    var cy = svgH / 2;
-    var space = Math.min(svgW, svgH);
-    var orbitR = space * 0.18;
-    var maxTreeR = space * 0.28;
+    let selectMode = toolMode === "select";
+    let typeLookup = buildPathLookup(allNodes);
+    let cx = svgW / 2;
+    let cy = svgH / 2;
+    let space = Math.min(svgW, svgH);
+    let orbitR = space * 0.18;
+    let maxTreeR = space * 0.28;
 
-    var g = svg.append("g");
+    let g = svg.append("g");
 
-    for (var gi = 0; gi < groups.length; gi++) {
-        var group = groups[gi];
-        var rootData = buildGroupTree(group.paths, typeLookup);
+    for (let gi = 0; gi < groups.length; gi++) {
+        let group = groups[gi];
+        let rootData = buildGroupTree(group.paths, typeLookup);
 
         if (!rootData.children || !rootData.children.length) {
             continue;
         }
 
-        var root = d3.hierarchy(rootData);
+        let root = d3.hierarchy(rootData);
 
         if (!root.children || !root.children.length) {
             continue;
         }
 
-        var leafCount = 0;
+        let leafCount = 0;
 
         root.eachAfter(function(d) {
             d._leafCount = d.children
@@ -694,18 +690,18 @@ function renderForest(svg, groups, allNodes, svgW, svgH, toolMode, selectedPaths
         });
 
         leafCount = root._leafCount;
-        var maxDepth = 0;
+        let maxDepth = 0;
 
         root.eachBefore(function(d) {
             if (d.depth > maxDepth) { maxDepth = d.depth; }
         });
 
-        var angle = (gi / groups.length) * 2 * Math.PI - Math.PI / 2;
-        var wedge = (2 * Math.PI / groups.length) * 0.7;
-        var anglePerLeaf = wedge / Math.max(leafCount, 1);
-        var depthStep = Math.max(maxTreeR / Math.max(maxDepth, 1), 18);
+        let angle = (gi / groups.length) * 2 * Math.PI - Math.PI / 2;
+        let wedge = (2 * Math.PI / groups.length) * 0.7;
+        let anglePerLeaf = wedge / Math.max(leafCount, 1);
+        let depthStep = Math.max(maxTreeR / Math.max(maxDepth, 1), 18);
 
-        var tree = d3.tree()
+        let tree = d3.tree()
             .nodeSize([anglePerLeaf, depthStep])
             .separation(function(a, b) {
                 return (a.parent === b.parent ? 1 : 2);
@@ -713,11 +709,11 @@ function renderForest(svg, groups, allNodes, svgW, svgH, toolMode, selectedPaths
 
         tree(root);
 
-        var groupG = g.append("g");
+        let groupG = g.append("g");
 
         function project(d) {
-            var r = orbitR + d.y;
-            var a = angle + d.x;
+            let r = orbitR + d.y;
+            let a = angle + d.x;
             return [cx + r * Math.cos(a), cy + r * Math.sin(a)];
         }
 
@@ -726,26 +722,22 @@ function renderForest(svg, groups, allNodes, svgW, svgH, toolMode, selectedPaths
             .enter()
             .append("path")
             .attr("class", "forest-link")
-            .attr("d", function(d) {
-                var s = project(d.source);
-                var t = project(d.target);
+            .attr("d", d => {
+                let s = project(d.source);
+                let t = project(d.target);
                 return "M" + s[0] + "," + s[1] + "L" + t[0] + "," + t[1];
             })
-            .attr("stroke", function(d) {
-                return d.target.data._real ? group.color : null;
-            })
-            .attr("stroke-opacity", function(d) {
-                return d.target.data._real ? 0.45 : null;
-            });
+            .attr("stroke", d => d.target.data._real ? group.color : null)
+            .attr("stroke-opacity", d => d.target.data._real ? 0.45 : null);
 
-        var nodes = root.descendants();
+        let nodes = root.descendants();
 
-        var circles = groupG.selectAll(".forest-node")
-            .data(nodes.filter(function(d) { return d.depth > 0; }))
+        let circles = groupG.selectAll(".forest-node")
+            .data(nodes.filter(d => d.depth > 0))
             .enter()
             .append("circle")
-            .attr("class", function(d) {
-                var cls = "forest-node";
+            .attr("class", d => {
+                let cls = "forest-node";
 
                 if (!d.data._real) {
                     cls += " forest-node--default";
@@ -757,60 +749,48 @@ function renderForest(svg, groups, allNodes, svgW, svgH, toolMode, selectedPaths
 
                 return cls;
             })
-            .attr("transform", function(d) {
-                var p = project(d);
+            .attr("transform", d => {
+                let p = project(d);
                 return "translate(" + p[0] + "," + p[1] + ")";
             })
-            .attr("r", function(d) {
-                return d.data.type === "dir" ? 5 : 3;
-            })
-            .attr("fill", function(d) {
-                return d.data._real ? group.color : null;
-            })
-            .attr("fill-opacity", function(d) {
-                return d.data._real ? 0.7 : null;
-            })
-            .attr("stroke", function(d) {
-                return d.data._real ? group.color : null;
-            })
-            .attr("stroke-width", function(d) {
-                return d.data._real ? 0.5 : null;
-            })
-            .attr("stroke-opacity", function(d) {
-                return d.data._real ? 0.3 : null;
-            });
+            .attr("r", d => d.data.type === "dir" ? 5 : 3)
+            .attr("fill", d => d.data._real ? group.color : null)
+            .attr("fill-opacity", d => d.data._real ? 0.7 : null)
+            .attr("stroke", d => d.data._real ? group.color : null)
+            .attr("stroke-width", d => d.data._real ? 0.5 : null)
+            .attr("stroke-opacity", d => d.data._real ? 0.3 : null);
 
         if (selectMode) {
             circles.style("cursor", "pointer");
 
-            circles.on("click", function(event, d) {
+            circles.on("click", (event, d) => {
                 event.stopPropagation();
                 if (onToggleSelect) { onToggleSelect(d.data.path); }
             });
         }
 
-        var gx = cx + orbitR * Math.cos(angle);
-        var gy = cy + orbitR * Math.sin(angle);
+        let gx = cx + orbitR * Math.cos(angle);
+        let gy = cy + orbitR * Math.sin(angle);
 
         groupG.selectAll(".forest-label")
-            .data(nodes.filter(function(d) { return d.depth > 0; }))
+            .data(nodes.filter(d => d.depth > 0))
             .enter()
             .append("text")
             .attr("class", "forest-label")
-            .attr("transform", function(d) {
-                var p = project(d);
+            .attr("transform", d => {
+                let p = project(d);
                 return "translate(" + p[0] + "," + p[1] + ")";
             })
             .attr("dy", -6)
-            .attr("dx", function(d) {
-                var p = project(d);
+            .attr("dx", d => {
+                let p = project(d);
                 return p[0] >= cx ? 7 : -7;
             })
-            .attr("text-anchor", function(d) {
-                var p = project(d);
+            .attr("text-anchor", d => {
+                let p = project(d);
                 return p[0] >= cx ? "start" : "end";
             })
-            .text(function(d) {
+            .text(d => {
                 return d.data.name.length > 12
                     ? d.data.name.substring(0, 10) + "\u2026"
                     : d.data.name;
@@ -823,14 +803,14 @@ function renderForest(svg, groups, allNodes, svgW, svgH, toolMode, selectedPaths
             .attr("dy", 4)
             .attr("text-anchor", "middle")
             .attr("fill", group.color)
-            .attr("font-size", 11)
+            .attr("font-size", "11px")
             .attr("font-weight", 700)
             .text(group.name);
     }
 
     if (selectMode) {
         parent.classList.add("tree-visual--select");
-        svg.on("click", function() {
+        svg.on("click", () => {
             if (onToggleSelect) { onToggleSelect(null); }
         });
     } else {
@@ -838,7 +818,7 @@ function renderForest(svg, groups, allNodes, svgW, svgH, toolMode, selectedPaths
         svg.on("click", null);
     }
 
-    var initT;
+    let initT;
 
     if (_zoomT) {
         initT = d3.zoomIdentity
@@ -851,12 +831,10 @@ function renderForest(svg, groups, allNodes, svgW, svgH, toolMode, selectedPaths
 
     g.attr("transform", initT);
 
-    var zoom = d3.zoom()
+    let zoom = d3.zoom()
         .scaleExtent([0.1, 5])
-        .filter(function() {
-            return !selectMode;
-        })
-        .on("zoom", function(event) {
+        .filter(() => !selectMode)
+        .on("zoom", event => {
             g.attr("transform", event.transform);
             _zoomT = { x: event.transform.x, y: event.transform.y, k: event.transform.k };
         });

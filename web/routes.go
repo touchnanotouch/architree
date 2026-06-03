@@ -34,6 +34,8 @@ func SetupRouter(log *slog.Logger, cfg *config.Config, efs *embed.FS) *gin.Engin
 
 	r.POST("/api/scan", h.Scan)
 	r.POST("/api/tests/run", h.RunTests)
+	r.GET("/api/project/config", h.LoadConfig)
+	r.POST("/api/project/config", h.SaveConfig)
 
 	return r
 }

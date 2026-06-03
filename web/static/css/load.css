@@ -1,8 +1,0 @@
-/* Core */
-
-@import url("core/vars.css");
-@import url("core/reset.css");
-@import url("core/layout.css");
-@import url("components/topbar.css");
-@import url("components/sidebar.css");
-@import url("components/page.css");
