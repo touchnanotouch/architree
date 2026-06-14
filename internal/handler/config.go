@@ -28,7 +28,7 @@ func (h *Handler) SaveConfig(c *gin.Context) {
 		return
 	}
 
-	fpath := filepath.Join(dir, "config.json")
+	fpath := filepath.Join(dir, "groups.json")
 
 	if err := os.WriteFile(fpath, req.Data, 0644); err != nil {
 		h.log.Error("write config", "path", fpath, "error", err)
